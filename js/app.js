@@ -168,7 +168,14 @@ function fillExplainers() {
   for (const s of SCENARIOS) { const tr = el('tr'); tr.append(el('td', null, s.name), el('td', null, s.note.replace(' guesses an hour', ' / hour').replace(' guesses a second', ' / second'))); sp.append(tr); }
 }
 
-if (matchMedia('(max-width: 900px)').matches) $('#you').removeAttribute('open');
+// Wide screens: the details card is a fixed side column, so keep it open (no collapsing).
+// Narrow screens: it stacks above the lab, so start it closed and let people toggle it.
+const narrow = matchMedia('(max-width: 900px)');
+const you = $('#you');
+function syncYou() { you.classList.toggle('pinned', !narrow.matches); you.open = !narrow.matches; }
+you.querySelector('summary').addEventListener('click', (e) => { if (!narrow.matches) e.preventDefault(); });
+narrow.addEventListener('change', syncYou);
+syncYou();
 fillExplainers(); makePhrase(); makeChars(); update();
 
 // handy for tests and for the presentation
