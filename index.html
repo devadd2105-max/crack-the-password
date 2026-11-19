@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Crack the Password</title>
+<meta name="description" content="Type a pretend password, tell the Cracker a little about yourself, and see how fast it breaks. Includes a live entropy meter and a generator for passwords that hold. Runs entirely in your browser.">
+<meta name="theme-color" content="#0e1726">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230e1726'/%3E%3Crect x='7' y='14' width='18' height='12' rx='2' fill='%23ffd21f'/%3E%3Cpath d='M11 14v-3a5 5 0 0 1 10 0v3' fill='none' stroke='%23ffd21f' stroke-width='2.5'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<a class="skip" href="#password">Skip to the password box</a>
+
+<header class="top">
+  <div class="top-in">
+    <h1>Crack the <span class="pw-word">Password</span></h1>
+    <p class="sub">Type a pretend password. The Cracker shows how it would break in, how long that takes, and how to build one that holds.</p>
+    <p class="privacy">
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2" fill="currentColor"/><path d="M8 10V7a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2.2"/></svg>
+      <span><strong>Nothing you type leaves this page.</strong> Still, never type a real password here. Make up one in the same style.</span>
+    </p>
+  </div>
+</header>
+
+<main class="grid">
+
+  <details class="card you" id="you" open>
+    <summary><span class="h2">Tell the Cracker about you</span><span class="opt">optional</span></summary>
+    <p class="hint">These are things a stranger can read off your social media. A real attacker tries them first.</p>
+    <form id="details" autocomplete="off" onsubmit="return false">
+      <label>First name<input name="first" type="text" maxlength="40" autocomplete="off" spellcheck="false"></label>
+      <label>Nickname<input name="nick" type="text" maxlength="40" autocomplete="off" spellcheck="false"></label>
+      <label>Family name<input name="last" type="text" maxlength="40" autocomplete="off" spellcheck="false"></label>
+      <label>Birthday<input name="birth" type="date" min="1920-01-01" max="2030-12-31" autocomplete="off"></label>
+      <label>Pet’s name<input name="pet" type="text" maxlength="40" autocomplete="off" spellcheck="false"></label>
+      <label>School or CCA<input name="school" type="text" maxlength="40" autocomplete="off" spellcheck="false"></label>
+      <label>Favourite team<input name="team" type="text" maxlength="40" autocomplete="off" spellcheck="false"></label>
+      <label>Hobby or favourite show<input name="hobby" type="text" maxlength="40" autocomplete="off" spellcheck="false"></label>
+      <label class="wide">One more word that matters to you<input name="other" type="text" maxlength="40" autocomplete="off" spellcheck="false"></label>
+    </form>
+    <div class="row">
+      <button type="button" class="btn ghost" id="example">Fill in an example person</button>
+      <button type="button" class="btn ghost" id="clear">Clear details</button>
+    </div>
+  </details>
+
+  <section class="lab" aria-labelledby="lab-h">
+    <h2 id="lab-h" class="visually-hidden">The cracking lab</h2>
+
+    <div class="card test">
+      <label class="pw-label" for="password">Password to test</label>
+      <div class="pw-row">
+        <input id="password" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="200" placeholder="type a pretend password" aria-describedby="status">
+        <button type="button" class="btn" id="toggle" aria-pressed="false">Hide</button>
+      </div>
+      <div class="samples" aria-label="Try one of these">
+        <span class="samples-l">Try:</span>
+        <button type="button" class="chip" data-pw="password">password</button>
+        <button type="button" class="chip" data-pw="Mochi#2007">Mochi#2007</button>
+        <button type="button" class="chip" data-pw="P@ssw0rd!">P@ssw0rd!</button>
+        <button type="button" class="chip" data-pw="purple-elephant-sings-quietly">purple-elephant-sings-quietly</button>
+      </div>
+
+      <div class="meter-block" id="meter-block" data-level="none">
+        <div class="meter-head">
+          <div class="bits"><span id="bits">0</span><small>bits of entropy</small></div>
+          <div class="level" id="level">Waiting for a password</div>
+        </div>
+        <div class="meter" id="meter" role="meter" aria-label="Effective entropy in bits" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <div class="fill" id="fill"></div>
+          <div class="ticks" aria-hidden="true">
+            <i style="left:28%"></i><i style="left:36%"></i><i style="left:50%"></i><i style="left:64%"></i><i style="left:80%"></i>
+          </div>
+          <div class="theory" id="theory" aria-hidden="true"><span>looks like <b id="theory-bits">0</b></span></div>
+        </div>
+        <div class="scale" aria-hidden="true"><span style="left:0">0</span><span style="left:28%">28</span><span style="left:50%">50</span><span style="left:64%">64</span><span style="left:80%">80</span><span style="left:100%">100+ bits</span></div>
+        <p class="meter-note" id="meter-note">Bits count how many times the attacker’s work doubles. The marker shows what the length and symbols <em>seem</em> to give. The bar is what the Cracker actually needs.</p>
+      </div>
+    </div>
+
+    <div class="card verdict" id="verdict" data-state="none">
+      <div class="tape" aria-hidden="true"></div>
+      <div class="verdict-in">
+        <div class="lock" aria-hidden="true">
+          <svg class="lock-closed" viewBox="0 0 64 64"><rect x="10" y="28" width="44" height="30" rx="6"/><path d="M20 28v-8a12 12 0 0 1 24 0v8" fill="none" stroke-width="6" stroke-linecap="round"/><circle cx="32" cy="43" r="4" class="keyhole"/></svg>
+          <svg class="lock-open" viewBox="0 0 64 64"><rect x="10" y="28" width="44" height="30" rx="6"/><path d="M20 28v-8a12 12 0 0 1 22-6" fill="none" stroke-width="6" stroke-linecap="round"/><circle cx="32" cy="43" r="4" class="keyhole"/></svg>
+        </div>
+        <div class="v-text">
+          <p class="v-kicker" id="v-kicker">The Cracker is waiting</p>
+          <p class="v-head" id="v-head">Type a password to start.</p>
+          <p class="v-sub" id="v-sub">The attack is a stolen database protected by a fast hash. That is how most real passwords are lost.</p>
+        </div>
+      </div>
+      <div id="status" class="visually-hidden" role="status" aria-live="polite"></div>
+    </div>
+
+    <div class="card parts" id="parts-card" hidden>
+      <h3>How the Cracker takes it apart</h3>
+      <div class="parts-row" id="parts"></div>
+      <p class="parts-note">Each piece is guessed separately, then the pieces are glued together. The numbers are the guesses needed for that piece.</p>
+    </div>
+
+    <div class="card times" id="times-card" hidden>
+      <h3>How long, under four kinds of attack</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th scope="col">Attack</th><th scope="col">A stranger</th><th scope="col" id="th-knows">Someone who knows you</th></tr></thead>
+          <tbody id="times"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card found" id="found-card" hidden>
+      <div class="found-cols">
+        <div>
+          <h3>What the Cracker noticed</h3>
+          <ul class="notes" id="reasons"></ul>
+        </div>
+        <div>
+          <h3>What would help</h3>
+          <ul class="notes tips" id="tips"></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<section class="gen" id="generator" aria-labelledby="gen-h">
+  <div class="gen-in">
+    <h2 id="gen-h">Get a password that holds</h2>
+    <p class="gen-sub">Made with your browser’s secure random generator. Neither style uses anything from your details.</p>
+    <div class="gen-grid">
+
+      <article class="card gcard" data-kind="phrase">
+        <h3>Memorable: random words</h3>
+        <p class="gc-why">Easy to remember, long enough to be strong. The words are picked by chance, not by you.</p>
+        <output class="gout" id="out-phrase" aria-live="off"></output>
+        <div class="g-meter"><div class="g-fill" id="gm-phrase"></div></div>
+        <p class="g-line" id="gl-phrase"></p>
+        <div class="gctl">
+          <label>Words <b id="wcount">8</b><input type="range" id="words" min="5" max="12" value="8"></label>
+          <label class="check"><input type="checkbox" id="extras"> Add a number and symbol (for sites that insist)</label>
+        </div>
+        <div class="row">
+          <button type="button" class="btn" id="new-phrase">New one</button>
+          <button type="button" class="btn ghost" id="copy-phrase">Copy</button>
+          <button type="button" class="btn ghost" id="test-phrase">Test it above</button>
+        </div>
+      </article>
+
+      <article class="card gcard" data-kind="chars">
+        <h3>Maximum: random characters</h3>
+        <p class="gc-why">Hard to remember, so it belongs in a password manager. The most strength per character.</p>
+        <output class="gout mono" id="out-chars" aria-live="off"></output>
+        <div class="g-meter"><div class="g-fill" id="gm-chars"></div></div>
+        <p class="g-line" id="gl-chars"></p>
+        <div class="gctl">
+          <label>Length <b id="lcount">16</b><input type="range" id="length" min="10" max="32" value="16"></label>
+          <label class="check"><input type="checkbox" id="symbols" checked> Include symbols</label>
+        </div>
+        <div class="row">
+          <button type="button" class="btn" id="new-chars">New one</button>
+          <button type="button" class="btn ghost" id="copy-chars">Copy</button>
+          <button type="button" class="btn ghost" id="test-chars">Test it above</button>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<section class="how" aria-labelledby="how-h">
+  <div class="how-in">
+    <h2 id="how-h">How it works</h2>
+
+    <details open>
+      <summary>How the Cracker counts guesses</summary>
+      <div class="d-body">
+        <p>The Cracker does not try every combination in order. It asks: <em>what is the cheapest way to guess this?</em> It splits your password into pieces and prices each one.</p>
+        <ul>
+          <li><b>About you.</b> Names, pets, teams and birthdays go to the front of the queue.</li>
+          <li><b>Common passwords.</b> A list of the most-used ones, tried in order of popularity.</li>
+          <li><b>Words.</b> A dictionary of about 57,000 English words, plus capital letters and swaps like <code>@</code> for <code>a</code>.</li>
+          <li><b>Patterns.</b> Years, dates, <code>123</code>, <code>qwerty</code> and repeated chunks.</li>
+          <li><b>Brute force.</b> Whatever is left is guessed blindly, character by character.</li>
+        </ul>
+        <p>The cheapest split wins. That number is the guesses the password survives.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>What “bits of entropy” means</summary>
+      <div class="d-body">
+        <p>Entropy counts how many times the attacker’s work doubles. <b>10 bits</b> is about a thousand guesses. <b>20 bits</b> is about a million. <b>30 bits</b> is a billion. Every extra bit doubles it.</p>
+        <p>The Cracker’s bar shows <em>effective</em> entropy, the work a smart attacker needs. The marker shows <em>theoretical</em> entropy, which is just length times the size of the character set. Where the two disagree, the password is less random than it looks.</p>
+        <div class="demo" id="demo-gap"></div>
+      </div>
+    </details>
+
+    <details>
+      <summary>The four attacks, and why speed matters</summary>
+      <div class="d-body">
+        <div class="table-wrap"><table class="plain"><thead><tr><th>Attack</th><th>Guesses per second</th></tr></thead><tbody id="speeds"></tbody></table></div>
+        <p>A website that locks you out is the safest place for a password. A stolen database is the worst: nothing slows the attacker down except the password itself. That is why the big headline uses the fast-hash row.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>Why length beats symbols</summary>
+      <div class="d-body">
+        <p>Each extra character multiplies the work. A symbol swapped into a word barely does, because crackers try those swaps. Compare:</p>
+        <div class="demo" id="demo-length"></div>
+      </div>
+    </details>
+
+    <details>
+      <summary>Build your own checker (Python)</summary>
+      <div class="d-body">
+        <p>A starting point for the Discovery Fortnight exercise. Run it, then improve it: add a bigger common list, catch years, or give a better label.</p>
+        <div class="code-wrap">
+          <button type="button" class="btn ghost small" id="copy-code">Copy code</button>
+          <pre><code id="code">import math
+import re
+
+COMMON = {"password", "123456", "qwerty", "iloveyou", "letmein"}
+
+def strength(password, personal=()):
+    """Return (bits, label). `personal` holds names, pets, birthdays."""
+    pw = password.lower()
+    if pw in COMMON:
+        return 0, "Very weak: a common password"
+    for word in personal:
+        if word and word.lower() in pw:
+            return 0, "Very weak: it contains your own details"
+
+    pool = 0
+    if re.search(r"[a-z]", password): pool += 26
+    if re.search(r"[A-Z]", password): pool += 26
+    if re.search(r"[0-9]", password): pool += 10
+    if re.search(r"[^a-zA-Z0-9]", password): pool += 33
+    if pool == 0:
+        return 0, "Type something"
+
+    bits = len(password) * math.log2(pool)
+    for limit, label in [(28, "Very weak"), (36, "Weak"), (50, "Fair"),
+                         (64, "Good"), (80, "Strong")]:
+        if bits &lt; limit:
+            return round(bits), label
+    return round(bits), "Excellent"
+
+print(strength("Deva2005", personal=["Deva", "2005"]))
+print(strength("purple-elephant-sings-quietly"))</code></pre>
+        </div>
+      </div>
+    </details>
+
+    <details>
+      <summary>What this can and cannot tell you</summary>
+      <div class="d-body">
+        <ul>
+          <li>The Cracker is a set of rules, not artificial intelligence. It can explain every number it gives.</li>
+          <li>Times are estimates. Real attackers use bigger lists, and hash speeds vary by machine.</li>
+          <li>Treat a good score as “hard to guess”, not “safe”. Reusing a password across sites defeats any strong password.</li>
+          <li>The best habit: a unique random password for every account, kept in a password manager, plus two-step login.</li>
+        </ul>
+      </div>
+    </details>
+  </div>
+</section>
+
+<footer class="foot">
+  <p>Made by <a href="https://github.com/devadd2105-max">Devadarshan</a> for the Infocomm Club. Source on <a href="https://github.com/devadd2105-max/crack-the-password">GitHub</a>. Word list derived from SCOWL.</p>
+</footer>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
